@@ -1,13 +1,21 @@
+Before we start i just switched to gitlab because i lost my github acount for ever.
+
 # Do-not-walk
 Addon that make travling faster
 
 ## Vanila Item change
 ### compass
-* __Right click__: to go to world 
-spawn (click twice in the first time)
+* __Shift Right click__: to go to world 
+spawn
 
 ### Recouvory compass
 * __Right click__: to teleport you to place that you die in last time 
+
+## new for 2.0.0
+### Lodestone compass
+* __Right click__ on a lodestone to set something like a way
+point to it.
+* __Shift right click__ to teleport to the lodestone!!
 
 ## New Items
 ### Recall Scroll
@@ -25,6 +33,11 @@ __Right click__: to go to The end dimention
 * __Right click__: to open the menu and select option
 if want to set home:
 Shift Right click and select option that has Recall scroll logo
+
+## New for 2.0.0!!
+### Magic merror
+__Right click__ to chose the player that you want to transfer an item to them!!
+even tho you were in defferent dimentions!!!
 
 enjoy :D
 
