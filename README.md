@@ -1,7 +1,7 @@
 Before we start i just switched to gitlab because i lost my github acount for ever.
 
-# Do-not-walk
-Addon that make travling faster
+# Not even hard!
+Easy life with this one
 
 ## Vanila Item change
 ### compass
