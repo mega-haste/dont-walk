@@ -1,0 +1,40 @@
+{
+    "format_version": "1.20.50",
+    "minecraft:block": {
+        "description": {
+            "identifier": "haste:lodevoid",
+            "menu_category": {
+                "category": "items",
+                "group": "itemGroup.name.create",
+                "is_hidden_in_commands": false
+            },
+            "states": {
+                /*"haste:location": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },*/
+                "haste:dimention": [
+                    "minecraft:overwold",
+                    "minecraft:nether",
+                    "minecraft:end"
+                ]
+            }
+        },
+        "components": {
+            "minecraft:material_instances": {
+                "*": {
+                    "render_method": "blend",
+                    "texture": "dirt"
+                }
+            },
+            "minecraft:destructible_by_explosion": true,
+            "minecraft:destructible_by_mining": true,
+            "minecraft:collision_box": true,
+            "minecraft:selection_box": true,
+            "minecraft:map_color": "#000000"
+        },
+        "events": {},
+        "permutations": []
+    }
+}

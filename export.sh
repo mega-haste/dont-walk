@@ -11,5 +11,5 @@ mkdir "$RP_EXPORT/$EXPORT"
 cp -r BP "$BP_EXPORT/$EXPORT/"
 cp -r RP "$RP_EXPORT/$EXPORT/"
 
-zip "$EXPORT.mcaddon" BP RP 
+zip -r "$EXPORT.mcaddon" BP/ RP/
 

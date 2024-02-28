@@ -1,23 +1,29 @@
-import { EntityInventoryComponent, world } from "@minecraft/server";
+import {
+    DimensionLocation,
+    EntityInventoryComponent,
+    ItemStack,
+    world
+} from "@minecraft/server";
 import { toVector } from "./utils";
-function parseFromLores(item) {
+
+function parseFromLores(item: ItemStack): DimensionLocation {
     const lores = item.getLore();
     if (lores.length < 2) {
         throw new Error();
     }
     const p = lores[0].split(' ');
-    const result = {};
+    const result = {} as DimensionLocation;
     result.x = parseFloat(p[0]);
     result.y = parseFloat(p[1]);
     result.z = parseFloat(p[2]);
     result.dimension = world.getDimension(lores[1]);
     return result;
 }
-world.afterEvents.itemUseOn.subscribe(({ block, source, itemStack: item }) => {
-    if (item.typeId !== "minecraft:lodestone_compass")
-        return;
+
+world.afterEvents.itemUseOn.subscribe(({ block, source, itemStack: item })=>{
+    if (item.typeId !== "minecraft:lodestone_compass") return;
     if (block.typeId === "minecraft:lodestone") {
-        const invComponent = source.getComponent(EntityInventoryComponent.componentId);
+        const invComponent = source.getComponent(EntityInventoryComponent.componentId) as EntityInventoryComponent;
         item.setLore([
             `${block.x} ${block.y + 1} ${block.z}`,
             `${block.dimension.id}`
@@ -25,22 +31,23 @@ world.afterEvents.itemUseOn.subscribe(({ block, source, itemStack: item }) => {
         invComponent.container?.setItem(source.selectedSlot, item);
     }
 });
-world.afterEvents.itemUse.subscribe(({ itemStack: item, source }) => {
-    if (item.typeId !== "minecraft:lodestone_compass" || !source.isSneaking)
-        return;
+
+world.afterEvents.itemUse.subscribe(({ itemStack: item, source })=>{
+    if (item.typeId !== "minecraft:lodestone_compass" || !source.isSneaking) return;
     const lores = item.getLore();
-    if (lores.length != 2)
-        return;
+    if (lores.length != 2) return;
     const po = parseFromLores(item);
     const pos = toVector(po);
+
     source.tryTeleport(pos, {
         dimension: po.dimension
     });
     pos.y -= 1;
-    if (po.dimension.getBlock(pos).typeId !== "minecraft:lodestone") {
-        const invComponent = source.getComponent(EntityInventoryComponent.componentId);
+    if (po.dimension.getBlock(pos)!.typeId !== "minecraft:lodestone") {
+        const invComponent = source.getComponent(EntityInventoryComponent.componentId) as EntityInventoryComponent;
         item.setLore([]);
         invComponent.container?.setItem(source.selectedSlot, item);
         return;
     }
 });
+
