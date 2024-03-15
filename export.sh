@@ -1,7 +1,7 @@
 
 EXPORT="Don't-walk"
-BP_EXPORT="/sdcard/Android/data/com.mojang.minecraftpe.patch/files/games/com.mojang/development_behavior_packs/"
-RP_EXPORT="/sdcard/Android/data/com.mojang.minecraftpe.patch/files/games/com.mojang/development_resource_packs/"
+BP_EXPORT="/sdcard/Android/data/com.mojang.minecraftpe/files/games/com.mojang/development_behavior_packs/"
+RP_EXPORT="/sdcard/Android/data/com.mojang.minecraftpe/files/games/com.mojang/development_resource_packs/"
 
 rm -rdf "$BP_EXPORT/$EXPORT" "$RP_EXPORT/$EXPORT"
 

@@ -13,16 +13,107 @@ import {
   Player,
   Entity,
   Vector,
+  ItemStack,
+  EntityInventoryComponent,
+  RawMessage,
 } from "@minecraft/server";
 import {
-  ActionFormData
+  ActionFormData, ActionFormResponse, FormCancelationReason,
 } from "@minecraft/server-ui";
 import resetWorldSpawn from "./utils.js";
 import "./transfer.js";
 import "./lodestone.js";
 
+function* range(end: number, start: number = 0, step: number = 1)
+{
+    while (start <= end) {
+        yield start;
+        start += step;
+    }
+}
+
+type ActionFormOnSubmit = (i: number) => void;
+type ActionFormOnCancel = (reason?: FormCancelationReason) => void;
+
+class ActionForm {
+    #onsubmit: ActionFormOnSubmit = () => {};
+    #oncancel: ActionFormOnCancel = () => {};
+    #form: ActionFormData;
+    #index = 0;
+    #buttonsEvents: Map<number, ActionFormOnSubmit> = new Map();
+    public constructor(title: string, body?: string) {
+        this.#form = new ActionFormData().title(title).body(body ?? "");
+    }
+    public addButton(text: string | RawMessage, icon?: string, onClick?: ActionFormOnSubmit) {
+        this.#form.button(text, icon);
+        if (onClick)
+            this.#buttonsEvents.set(this.#index, onClick);
+        this.#index++;
+    }
+    public onsubmit(ev: ActionFormOnSubmit) {
+        this.#onsubmit = ev;
+    }
+    public oncancel(ev: ActionFormOnCancel) {
+        this.#oncancel = ev;
+    }
+    public async show(player: Player): Promise<ActionFormResponse> {
+        const res = await this.#form.show(player as any);
+        if (res.canceled)
+            this.#oncancel(res.cancelationReason);
+        else if (res.selection !== undefined) {
+            this.#onsubmit(res.selection);
+            let e = this.#buttonsEvents.get(res.selection);
+            if (e)
+                e(res.selection);
+        }
+        return res;
+    }
+}
+
+world.afterEvents.itemUse.subscribe(ev => {
+    const {
+        source,
+        itemStack: item
+    } = ev;
+    if (item.typeId !== "minecraft:iron_sword") return;
+    const invComponent = source.getComponent(EntityInventoryComponent.componentId) as EntityInventoryComponent;
+    const container = invComponent.container;
+    const items: ItemStack[] = [];
+    const insertingForm = new ActionForm("Storage", "Select an item to store");
+    const bForm = new ActionForm("Storage", "Select an option");
+    bForm.addButton("Get an item", undefined, ()=>{
+        const t = new ActionFormData();
+        for (let i of item.getDynamicPropertyIds()) {
+            t.button(`${i}(${item.getDynamicProperty(i)})`);
+        }
+        t.show(source as any);
+    });
+    bForm.addButton("Store an item", undefined, ()=>{
+        insertingForm.show(source);
+    });
+    insertingForm.onsubmit((i)=> {
+        item.setDynamicProperty(
+            items[i].typeId,
+            (item.getDynamicProperty(items[i].typeId) ?? 0) as number + items[i].amount
+        );
+        container?.setItem(source.selectedSlot, item);
+        source.sendMessage("== start ==========")
+        item.getDynamicPropertyIds().forEach(j => {
+            source.sendMessage(`${j}(${item.getDynamicProperty(j)})`);
+        });
+        source.sendMessage("== end ============")
+    });
+    for (let i of range((container?.size ?? 1) - 1)) {
+        const j = container?.getItem(i);
+        if (j) {
+            items.push(j);
+            insertingForm.addButton(j.typeId);
+        }
+    }
+    bForm.show(source);
+});
+
 world.beforeEvents.explosion.subscribe(ev => {
-    world.sendMessage(ev.source?.typeId ?? "");
     if (ev.source?.typeId === "minecraft:creeper") {
         ev.setImpactedBlocks([]);
     }

@@ -1,4 +1,4 @@
-import { EntityInventoryComponent, ItemStack, world } from "@minecraft/server";
+import { EntityInventoryComponent, world } from "@minecraft/server";
 import { ActionFormData, ModalFormData, MessageFormData } from "@minecraft/server-ui";
 class ItemI {
     constructor(item, index) {
@@ -10,7 +10,7 @@ world.afterEvents.itemUse.subscribe(async ({ source, itemStack: item }) => {
     if (item.typeId !== "haste:magic_mirror")
         return;
     const players = world.getPlayers({
-    //excludeNames: [source.name]
+        excludeNames: [source.name]
     });
     if (!players.length) { // Some jokes :D
         new MessageFormData()
@@ -33,7 +33,6 @@ world.afterEvents.itemUse.subscribe(async ({ source, itemStack: item }) => {
     const resever_form = new ActionFormData();
     resever_form.title("Transfer to ...");
     for (const i of players) {
-        //if (i.name === source.name) continue;
         resever_form.button(i.name);
     }
     const resever = await resever_form.show(source);
@@ -72,7 +71,12 @@ world.afterEvents.itemUse.subscribe(async ({ source, itemStack: item }) => {
         resever_p.sendMessage("Your have to get your inventory clean to get the item!!");
         source.sendMessage("can't give them the item :(");
     }
-    resever_inv.container?.addItem(new ItemStack(item_t.item.typeId, amount));
+    // Transfering the item
+    {
+        const i = item_t.item.clone();
+        i.amount = amount;
+        resever_inv.container?.addItem(i);
+    }
     if (item_t.item.amount === amount) {
         player_inventory.container?.setItem(item_t.index);
         return;

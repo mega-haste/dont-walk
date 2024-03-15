@@ -37,7 +37,7 @@ world.afterEvents.itemUse.subscribe(({ itemStack: item, source }) => {
         dimension: po.dimension
     });
     pos.y -= 1;
-    if (po.dimension.getBlock(pos).typeId !== "minecraft:lodestone") {
+    if (po.dimension.getBlock(pos)?.typeId !== "minecraft:lodestone") {
         const invComponent = source.getComponent(EntityInventoryComponent.componentId);
         item.setLore([]);
         invComponent.container?.setItem(source.selectedSlot, item);
