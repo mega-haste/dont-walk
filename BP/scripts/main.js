@@ -1,12 +1,3 @@
-/**
-  * well, im the developer.
-  * I just want you enjoy my addon. but don't take all that
-  * make as yours.
-  * So if want to make content with this addon or use it
-  * in a mod pack, plz mension me as creator
-  *
-  * By Hesham aka Haste
-  */
 var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
     if (kind === "m") throw new TypeError("Private method is not writable");
     if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
@@ -19,9 +10,9 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
 var _ActionForm_onsubmit, _ActionForm_oncancel, _ActionForm_form, _ActionForm_index, _ActionForm_buttonsEvents;
-import { world, Vector, EntityInventoryComponent, } from "@minecraft/server";
+import { world } from "@minecraft/server";
 import { ActionFormData, } from "@minecraft/server-ui";
-import resetWorldSpawn from "./utils.js";
+import resetWorldSpawn, { Vector } from "./utils.js";
 import "./transfer.js";
 import "./lodestone.js";
 function* range(end, start = 0, step = 1) {
@@ -66,61 +57,24 @@ class ActionForm {
     }
 }
 _ActionForm_onsubmit = new WeakMap(), _ActionForm_oncancel = new WeakMap(), _ActionForm_form = new WeakMap(), _ActionForm_index = new WeakMap(), _ActionForm_buttonsEvents = new WeakMap();
-world.afterEvents.itemUse.subscribe(ev => {
-    const { source, itemStack: item } = ev;
-    if (item.typeId !== "minecraft:iron_sword")
-        return;
-    const invComponent = source.getComponent(EntityInventoryComponent.componentId);
-    const container = invComponent.container;
-    const items = [];
-    const insertingForm = new ActionForm("Storage", "Select an item to store");
-    const bForm = new ActionForm("Storage", "Select an option");
-    bForm.addButton("Get an item", undefined, () => {
-        const t = new ActionFormData();
-        for (let i of item.getDynamicPropertyIds()) {
-            t.button(`${i}(${item.getDynamicProperty(i)})`);
-        }
-        t.show(source);
-    });
-    bForm.addButton("Store an item", undefined, () => {
-        insertingForm.show(source);
-    });
-    insertingForm.onsubmit((i) => {
-        item.setDynamicProperty(items[i].typeId, (item.getDynamicProperty(items[i].typeId) ?? 0) + items[i].amount);
-        container?.setItem(source.selectedSlot, item);
-        source.sendMessage("== start ==========");
-        item.getDynamicPropertyIds().forEach(j => {
-            source.sendMessage(`${j}(${item.getDynamicProperty(j)})`);
-        });
-        source.sendMessage("== end ============");
-    });
-    for (let i of range((container?.size ?? 1) - 1)) {
-        const j = container?.getItem(i);
-        if (j) {
-            items.push(j);
-            insertingForm.addButton(j.typeId);
-        }
-    }
-    bForm.show(source);
-});
-world.beforeEvents.explosion.subscribe(ev => {
+world.beforeEvents.explosion.subscribe((ev) => {
     if (ev.source?.typeId === "minecraft:creeper") {
         ev.setImpactedBlocks([]);
     }
 });
-world.afterEvents.entityDie.subscribe(ev => {
+world.afterEvents.entityDie.subscribe((ev) => {
     const entity = ev.deadEntity;
     if (entity.typeId !== "minecraft:player")
         return;
     entity.setDynamicProperty("death_dimention", entity.dimension.id);
     entity.setDynamicProperty("death_pos", entity.location);
 });
-world.afterEvents.itemCompleteUse.subscribe(ev => {
+world.afterEvents.itemCompleteUse.subscribe((ev) => {
     if (ev.itemStack.typeId !== "minecraft:goat_horn")
         return;
     ev.source.addEffect("bad_omen", 9999999, {
         showParticles: false,
-        amplifier: 3
+        amplifier: 3,
     });
 });
 world.afterEvents.itemUse.subscribe(({ itemStack: item, source }) => {
@@ -152,8 +106,7 @@ world.afterEvents.itemUse.subscribe(({ itemStack: item, source }) => {
             .button("Nether", "textures/items/scroll_of_pain")
             .button("The end", "textures/items/the_end_scroll")
             .show(source);
-        form
-            .then((res) => {
+        form.then((res) => {
             if (res.canceled)
                 return;
             switch (res.selection) {
@@ -184,17 +137,22 @@ world.afterEvents.itemUse.subscribe(({ itemStack: item, source }) => {
                     theEnd(source);
                     break;
             }
-        })
-            .catch(_ => console.error(_));
+        }).catch((_) => console.error(_));
     }
 });
 function defaultSpawn(source) {
     try {
-        source.teleport(resetWorldSpawn(world), { dimension: world.getDimension("overworld") });
+        source.teleport(resetWorldSpawn(world), {
+            dimension: world.getDimension("overworld"),
+        });
     }
     catch (e) {
-        source.teleport(world.getDefaultSpawnLocation(), { dimension: world.getDimension("overworld") });
-        source.teleport(resetWorldSpawn(world), { dimension: world.getDimension("overworld") });
+        source.teleport(world.getDefaultSpawnLocation(), {
+            dimension: world.getDimension("overworld"),
+        });
+        source.teleport(resetWorldSpawn(world), {
+            dimension: world.getDimension("overworld"),
+        });
     }
 }
 function home(source) {
@@ -219,13 +177,17 @@ function home(source) {
             }
             return;
         }
-        source.teleport(source.getDynamicProperty("home_pos"), { dimension: world.getDimension(source.getDynamicProperty("home_dimention")) });
+        source.teleport(source.getDynamicProperty("home_pos"), {
+            dimension: world.getDimension(source.getDynamicProperty("home_dimention")),
+        });
     }
 }
 function lastDeath(source) {
     const deathPos = source.getDynamicProperty("death_pos");
     if (deathPos) {
-        source.teleport(deathPos, { dimension: world.getDimension(source.getDynamicProperty("death_dimention")) });
+        source.teleport(deathPos, {
+            dimension: world.getDimension(source.getDynamicProperty("death_dimention")),
+        });
         return;
     }
     source.sendMessage("You didn't die yet... " + source.name);
@@ -236,7 +198,10 @@ function nether(source) {
     loc.y = 50;
     source.addEffect("fire_resistance", 20 * 10, { showParticles: false });
     source.teleport(loc, { dimension: nether });
-    nether.fillBlocks({
+    const { x, y, z } = source.location;
+    nether.runCommand(`fill ${x - 5} ${y - 1} ${z - 5} ${x + 5} ${y - 1} ${x + 5} minecraft:polished_blackstone_bricks`);
+    nether.runCommand(`fill ${x - 5} ${y} ${z - 5} ${x + 5} ${y + 10} ${x + 5} minecraft:air`);
+    /*nether.fillBlocks({
         x: source.location.x - 5,
         y: source.location.y - 1,
         z: source.location.z - 5
@@ -254,6 +219,7 @@ function nether(source) {
         y: source.location.y + 10,
         z: source.location.z + 5
     }, "minecraft:air");
+    */
 }
 function theEnd(source) {
     if (source.dimension.id === "minecraft:the_end")
@@ -261,6 +227,6 @@ function theEnd(source) {
     source.teleport({
         x: 0,
         y: 65,
-        z: 0
+        z: 0,
     }, { dimension: world.getDimension("minecraft:the_end") });
 }

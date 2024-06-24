@@ -1,11 +1,11 @@
-import { EntityInventoryComponent, world } from "@minecraft/server";
+import { EntityEquippableComponent, EquipmentSlot, world, } from "@minecraft/server";
 import { toVector } from "./utils";
 function parseFromLores(item) {
     const lores = item.getLore();
     if (lores.length < 2) {
         throw new Error();
     }
-    const p = lores[0].split(' ');
+    const p = lores[0].split(" ");
     const result = {};
     result.x = parseFloat(p[0]);
     result.y = parseFloat(p[1]);
@@ -17,12 +17,12 @@ world.afterEvents.itemUseOn.subscribe(({ block, source, itemStack: item }) => {
     if (item.typeId !== "minecraft:lodestone_compass")
         return;
     if (block.typeId === "minecraft:lodestone") {
-        const invComponent = source.getComponent(EntityInventoryComponent.componentId);
+        const equippableComponent = source.getComponent(EntityEquippableComponent.componentId);
         item.setLore([
             `${block.x} ${block.y + 1} ${block.z}`,
-            `${block.dimension.id}`
+            `${block.dimension.id}`,
         ]);
-        invComponent.container?.setItem(source.selectedSlot, item);
+        equippableComponent.setEquipment(EquipmentSlot.Mainhand, item);
     }
 });
 world.afterEvents.itemUse.subscribe(({ itemStack: item, source }) => {
@@ -34,13 +34,13 @@ world.afterEvents.itemUse.subscribe(({ itemStack: item, source }) => {
     const po = parseFromLores(item);
     const pos = toVector(po);
     source.tryTeleport(pos, {
-        dimension: po.dimension
+        dimension: po.dimension,
     });
     pos.y -= 1;
     if (po.dimension.getBlock(pos)?.typeId !== "minecraft:lodestone") {
-        const invComponent = source.getComponent(EntityInventoryComponent.componentId);
+        const equippableComponent = source.getComponent(EntityEquippableComponent.componentId);
         item.setLore([]);
-        invComponent.container?.setItem(source.selectedSlot, item);
+        equippableComponent.setEquipment(EquipmentSlot.Mainhand, item);
         return;
     }
 });

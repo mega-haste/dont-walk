@@ -1,9 +1,12 @@
 import {
     Dimension,
     DimensionLocation,
-    Vector,
     World,
 } from "@minecraft/server";
+
+export class Vector {
+    constructor(public x: number, public y: number, public z: number) { }
+}
 
 export function toVector(l: DimensionLocation): Vector {
     return new Vector(l.x, l.y, l.z);

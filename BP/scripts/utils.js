@@ -1,4 +1,10 @@
-import { Vector, } from "@minecraft/server";
+export class Vector {
+    constructor(x, y, z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+}
 export function toVector(l) {
     return new Vector(l.x, l.y, l.z);
 }

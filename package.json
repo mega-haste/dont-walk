@@ -1,23 +1,20 @@
 {
-  "dependencies": {
-    "@minecraft/server": "^1.10.0-beta.1.20.70-stable",
-    "@minecraft/server-ui": "^1.2.0-beta.1.20.70-stable"
-  },
-  "devDependencies": {
-    "@types/webpack-env": "^1.18.4",
-    "eslint": "^8.57.0",
-    "typescript": "^5.3.3",
-    "typescript-eslint": "^7.1.0",
-    "webpack": "^5.90.3",
-    "webpack-cli": "^5.1.4"
-  },
-  "scripts": {
-    "build": "webpack"
-  },
-  "name": "Do-not-walk",
-  "version": "1.0.0",
-  "type": "module",
-  "repository": "git@gitlab.com:DasTech7/do-not-walk.git",
-  "author": "Hesham <www.hicham2005@gmail.com>",
-  "license": "MIT"
+    "dependencies": {
+        "@minecraft/common": "^1.2.0",
+        "@minecraft/server": "^1.11.0",
+        "@minecraft/server-ui": "^1.1.0",
+        "@minecraft/vanilla-data": "^1.21.0"
+    },
+    "devDependencies": {
+        "typescript": "^5.3.3"
+    },
+    "scripts": {
+        "build": "webpack"
+    },
+    "name": "Do-not-walk",
+    "version": "1.0.0",
+    "type": "module",
+    "repository": "git@gitlab.com:DasTech7/do-not-walk.git",
+    "author": "Hesham <www.hicham2005@gmail.com>",
+    "license": "MIT"
 }
