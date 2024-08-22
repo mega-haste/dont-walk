@@ -1,58 +1,16 @@
-import { world, Player, Entity, RawMessage } from "@minecraft/server";
-import {
-    ActionFormData,
-    ActionFormResponse,
-    FormCancelationReason,
-} from "@minecraft/server-ui";
-import resetWorldSpawn, { Vector } from "./utils.js";
+import { world, Entity, Player } from "@minecraft/server";
+import { ActionFormData } from "@minecraft/server-ui";
+import { Vector } from "./utils.js";
+import defaultSpawn from "./scrolls_method/defaultSpawn.js";
+import lastDeath from "./scrolls_method/lastDeath.js";
+import home from "./scrolls_method/home.js";
+
+import nether from "./scrolls_method/nether.js";
+import theEnd from "./scrolls_method/theEnd.js";
 import "./transfer.js";
 import "./lodestone.js";
-
-function* range(end: number, start: number = 0, step: number = 1) {
-    while (start <= end) {
-        yield start;
-        start += step;
-    }
-}
-
-type ActionFormOnSubmit = (i: number) => void;
-type ActionFormOnCancel = (reason?: FormCancelationReason) => void;
-
-class ActionForm {
-    #onsubmit: ActionFormOnSubmit = () => {};
-    #oncancel: ActionFormOnCancel = () => {};
-    #form: ActionFormData;
-    #index = 0;
-    #buttonsEvents: Map<number, ActionFormOnSubmit> = new Map();
-    public constructor(title: string, body?: string) {
-        this.#form = new ActionFormData().title(title).body(body ?? "");
-    }
-    public addButton(
-        text: string | RawMessage,
-        icon?: string,
-        onClick?: ActionFormOnSubmit
-    ) {
-        this.#form.button(text, icon);
-        if (onClick) this.#buttonsEvents.set(this.#index, onClick);
-        this.#index++;
-    }
-    public onsubmit(ev: ActionFormOnSubmit) {
-        this.#onsubmit = ev;
-    }
-    public oncancel(ev: ActionFormOnCancel) {
-        this.#oncancel = ev;
-    }
-    public async show(player: Player): Promise<ActionFormResponse> {
-        const res = await this.#form.show(player as any);
-        if (res.canceled) this.#oncancel(res.cancelationReason);
-        else if (res.selection !== undefined) {
-            this.#onsubmit(res.selection);
-            let e = this.#buttonsEvents.get(res.selection);
-            if (e) e(res.selection);
-        }
-        return res;
-    }
-}
+import "./compass/main.js";
+import "./tools/lumberjack_axe.js";
 
 world.beforeEvents.explosion.subscribe((ev) => {
     if (ev.source?.typeId === "minecraft:creeper") {
@@ -77,180 +35,77 @@ world.afterEvents.itemCompleteUse.subscribe((ev) => {
 });
 
 world.afterEvents.itemUse.subscribe(({ itemStack: item, source }) => {
-    if (item.typeId === "haste:recall_paper") {
-        home(source);
-    } else if (item.typeId === "haste:paper_of_suffering") {
-        nether(source);
-    } else if (item.typeId === "haste:paper_of_ending") {
-        theEnd(source);
-    } else if (item.typeId === "minecraft:recovery_compass") {
-        lastDeath(source);
-    } else if (item.typeId === "minecraft:compass") {
-        if (!source.isSneaking) return;
-        defaultSpawn(source);
-    } else if (item.typeId === "haste:dimensional_phone") {
-        const form = new ActionFormData()
-            .title("Dimentional Phone")
-            .body("Select option")
-            .button("Home", "textures/items/recall_scroll")
-            .button("Spawn", "textures/items/bed_purple")
-            .button("World spawn", "textures/items/compass_item")
-            .button("Last death body", "textures/items/recovery_compass_item")
-            .button("Nether", "textures/items/scroll_of_pain")
-            .button("The end", "textures/items/the_end_scroll")
-            .show(source as any);
-        form.then((res) => {
-            if (res.canceled) return;
-
-            switch (res.selection) {
-                case 0:
-                    home(source);
-                    break;
-                case 1:
-                    try {
-                        const loc = source.getSpawnPoint();
-                        if (!loc) return;
-                        source.teleport(
-                            new Vector(
-                                loc?.x as number,
-                                loc?.y as number,
-                                loc?.z as number
-                            ),
-                            { dimension: loc?.dimension }
-                        );
-                    } catch (e) {
-                        console.error(e);
-                    }
-                    break;
-                case 2:
-                    defaultSpawn(source);
-                    break;
-                case 3:
-                    lastDeath(source);
-                    break;
-                case 4:
-                    nether(source);
-                    break;
-                case 5:
-                    theEnd(source);
-                    break;
-            }
-        }).catch((_) => console.error(_));
+    switch (item.typeId) {
+        case "haste:recall_paper":
+            home(source);
+            break;
+        case "haste:paper_of_suffering":
+            nether(source);
+            break;
+        case "haste:paper_of_ending":
+            theEnd(source);
+            break;
+        case "minecraft:recovery_compass":
+            lastDeath(source);
+            break;
+        case "minecraft:compass":
+            if (!source.isSneaking) break;
+            defaultSpawn(source);
+            break;
+        case "haste:dimensional_phone":
+            dimensionalPhone(source);
+            break;
+        default:
+            break;
     }
 });
 
-function defaultSpawn(source: Player) {
-    try {
-        source.teleport(resetWorldSpawn(world), {
-            dimension: world.getDimension("overworld"),
-        });
-    } catch (e) {
-        source.teleport(world.getDefaultSpawnLocation(), {
-            dimension: world.getDimension("overworld"),
-        });
-        source.teleport(resetWorldSpawn(world), {
-            dimension: world.getDimension("overworld"),
-        });
-    }
-}
+function dimensionalPhone(source: Player) {
+    const form = new ActionFormData()
+        .title("Dimentional Phone")
+        .body("Select option")
+        .button("Home", "textures/items/recall_scroll")
+        .button("Spawn", "textures/items/bed_purple")
+        .button("World spawn", "textures/items/compass_item")
+        .button("Last death body", "textures/items/recovery_compass_item")
+        .button("Nether", "textures/items/scroll_of_pain")
+        .button("The end", "textures/items/the_end_scroll")
+        .show(source as any);
+    form.then((res) => {
+        if (res.canceled) return;
 
-function home(source: Player) {
-    if (source.isSneaking) {
-        if (source.dimension.id != "minecraft:overworld") {
-            source.sendMessage(
-                `Recall Scroll only works in overworld dimention`
-            );
-            return;
-        }
-
-        // source.setDynamicProperty("home_pos", toFString(source.location));
-        source.setDynamicProperty("home_pos", source.location);
-        source.setDynamicProperty("home_dimention", source.dimension.id);
-        world.playSound("beacon.activate", source.location);
-    } else {
-        if (!source.getDynamicProperty("home_pos")) {
-            try {
-                const spawn = source.getSpawnPoint();
-                source.teleport(
-                    new Vector(
-                        spawn?.x as number,
-                        spawn?.y as number,
-                        spawn?.z as number
-                    ),
-                    { dimension: world.getDimension("overworld") }
-                );
-            } catch (e) {
+        switch (res.selection) {
+            case 0:
+                home(source);
+                break;
+            case 1:
+                try {
+                    const loc = source.getSpawnPoint();
+                    if (!loc) return;
+                    source.teleport(
+                        new Vector(
+                            loc?.x as number,
+                            loc?.y as number,
+                            loc?.z as number
+                        ),
+                        { dimension: loc?.dimension }
+                    );
+                } catch (e) {
+                    console.error(e);
+                }
+                break;
+            case 2:
                 defaultSpawn(source);
-            }
-            return;
+                break;
+            case 3:
+                lastDeath(source);
+                break;
+            case 4:
+                nether(source);
+                break;
+            case 5:
+                theEnd(source);
+                break;
         }
-        source.teleport(source.getDynamicProperty("home_pos") as Vector, {
-            dimension: world.getDimension(
-                source.getDynamicProperty("home_dimention") as string
-            ),
-        });
-    }
-}
-
-function lastDeath(source: Player) {
-    const deathPos = source.getDynamicProperty("death_pos") as Vector;
-    if (deathPos) {
-        source.teleport(deathPos, {
-            dimension: world.getDimension(
-                source.getDynamicProperty("death_dimention") as string
-            ),
-        });
-        return;
-    }
-    source.sendMessage("You didn't die yet... " + source.name);
-}
-
-function nether(source: Player) {
-    const loc = world.getDefaultSpawnLocation();
-    const nether = world.getDimension("minecraft:nether");
-    loc.y = 50;
-
-    source.addEffect("fire_resistance", 20 * 10, { showParticles: false });
-    source.teleport(loc, { dimension: nether });
-    const { x, y, z } = source.location;
-    nether.runCommand(
-        `fill ${x - 5} ${y - 1} ${z - 5} ${x + 5} ${y - 1} ${
-            x + 5
-        } minecraft:polished_blackstone_bricks`
-    );
-    nether.runCommand(
-        `fill ${x - 5} ${y} ${z - 5} ${x + 5} ${y + 10} ${x + 5} minecraft:air`
-    );
-    /*nether.fillBlocks({
-        x: source.location.x - 5,
-        y: source.location.y - 1,
-        z: source.location.z - 5
-    }, {
-        x: source.location.x + 5,
-        y: source.location.y - 1,
-        z: source.location.z + 5
-    }, "minecraft:polished_blackstone_bricks");
-    nether.fillBlocks({
-        x: source.location.x - 5,
-        y: source.location.y,
-        z: source.location.z - 5
-    }, {
-        x: source.location.x + 5,
-        y: source.location.y + 10,
-        z: source.location.z + 5
-    }, "minecraft:air");
-    */
-}
-
-function theEnd(source: Player) {
-    if (source.dimension.id === "minecraft:the_end") return;
-
-    source.teleport(
-        {
-            x: 0,
-            y: 65,
-            z: 0,
-        },
-        { dimension: world.getDimension("minecraft:the_end") }
-    );
+    }).catch((_) => console.error(_));
 }

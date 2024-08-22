@@ -1,0 +1,19 @@
+{
+    "format_version": "1.19.60",
+    "minecraft:recipe_shaped": {
+        "description": {
+            "identifier": "minecraft:copper_block"
+        },
+        "tags": ["crafting_table"],
+        "key": {
+            "C": {
+                "item": "minecraft:copper_ingot"
+            }
+        },
+        "pattern": ["CC", "CC"],
+        "result": {
+            "item": "minecraft:copper_block",
+            "count": 2
+        }
+    }
+}
