@@ -17,7 +17,7 @@ export function buildDev() {
 
 export function exportBP() {
     return src("BP/**")
-        .pipe(GulpZip(`${bedrox.name}.bp.mcpack`, { compress: false }))
+        .pipe(GulpZip(`${bedrox.name}.bp.mcpack`))
         .pipe(dest(bedrox.dest));
 }
 
@@ -28,7 +28,7 @@ export function exportRP() {
 }
 
 export function exportAddon() {
-    return src(["BP/", "RP/"])
+    return src([`${bedrox.dest}/${bedrox.name}.bp.mcpack`, `${bedrox.dest}/${bedrox.name}.rp.mcpack`])
         .pipe(GulpZip(`${bedrox.name}.mcaddon`))
         .pipe(dest(bedrox.dest));
 }
