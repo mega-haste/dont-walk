@@ -1,5 +1,5 @@
 import { Player, world } from "@minecraft/server";
-import resetWorldSpawn from "../utils.js";
+import resetWorldSpawn from "../utils";
 
 export default function defaultSpawn(source: Player) {
     try {

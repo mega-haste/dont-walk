@@ -34,7 +34,6 @@
             "minecraft:selection_box": true,
             "minecraft:map_color": "#000000"
         },
-        "events": {},
         "permutations": []
     }
 }

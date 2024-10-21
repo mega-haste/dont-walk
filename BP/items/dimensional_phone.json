@@ -1,15 +1,18 @@
 {
-	"format_version": "1.19.60",
+	"format_version": "1.20.81",
 	"minecraft:item": {
 		"description": {
-			"identifier": "haste:dimensional_phone"
+			"identifier": "haste:dimensional_phone",
+			"menu_category": {
+				"category": "items"
+			}
 		},
 		"components": {
-			"minecraft:creative_category": {
-				"category": "items"
-			},
+			"minecraft:custom_components": ["haste:dimensional_phone"],
 			"minecraft:icon": {
-				"texture": "haste_dimensional_phone"
+				"textures": {
+					"default": "haste_dimensional_phone"
+				}
 			},
 			"minecraft:display_name": {
 				"value": "Dimensional Phone"

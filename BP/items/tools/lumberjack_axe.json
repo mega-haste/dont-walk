@@ -24,9 +24,6 @@
                     "default": "haste_lumberjack_axe"
                 }
             },
-            /*"minecraft:durability": {
-                "max_durability": 500
-            },*/
             "minecraft:enchantable": {
                 "slot": "axe",
                 "value": 16

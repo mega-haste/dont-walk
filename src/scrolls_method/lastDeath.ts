@@ -1,5 +1,5 @@
 import { Player, world } from "@minecraft/server";
-import { Vector } from "../utils.js";
+import { Vec3 as Vector } from "../mcQuery/math";
 
 export default function lastDeath(source: Player) {
     const deathPos = source.getDynamicProperty("death_pos") as Vector;

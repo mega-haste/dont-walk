@@ -8,44 +8,20 @@ import {
     Vector3,
     World,
 } from "@minecraft/server";
+import { Vec3 } from "./mcQuery/math";
 
-export class Vector implements Vector3 {
-    constructor(public x: number, public y: number, public z: number) {}
-    public static fromVector3(v3: Vector3): Vector {
-        return new Vector(v3.x, v3.y, v3.z);
-    }
-    public above(steps: number = 1): Vector {
-        return new Vector(this.x, this.y + steps, this.z);
-    }
-    public below(steps: number = 1): Vector {
-        return new Vector(this.x, this.y - steps, this.z);
-    }
-    public east(steps: number = 1): Vector {
-        return new Vector(this.x + steps, this.y, this.z);
-    }
-    public west(steps: number = 1): Vector {
-        return new Vector(this.x - steps, this.y, this.z);
-    }
-    public south(steps: number = 1): Vector {
-        return new Vector(this.x, this.y, this.z + 1);
-    }
-    public north(steps: number = 1): Vector {
-        return new Vector(this.x, this.y, this.z - 1);
-    }
+export function toVector(l: DimensionLocation): Vec3 {
+    return new Vec3(l.x, l.y, l.z);
 }
 
-export function toVector(l: DimensionLocation): Vector {
-    return new Vector(l.x, l.y, l.z);
-}
-
-export function locationToString(loc: Vector | Vector3) {
+export function locationToString(loc: Vec3 | Vector3) {
     return `${loc.x} ${loc.y} ${loc.z}`;
 }
 
 class VienBlock {
-    constructor(public pos: Vector | Vector3, public distance: number) {}
+    constructor(public pos: Vec3 | Vector3, public distance: number) {}
 }
-function getValidNeighbors(blockPos: Vector, distance: number): VienBlock[] {
+function getValidNeighbors(blockPos: Vec3, distance: number): VienBlock[] {
     const result: VienBlock[] = [];
     const up = blockPos.above();
     const down = blockPos.below();
@@ -75,14 +51,14 @@ export function doVienMine(
     noLimit: boolean = false
 ) {
     const maxDistance = 200;
-    let cordinates = getValidNeighbors(Vector.fromVector3(block.location), 1);
+    let cordinates = getValidNeighbors(Vec3.fromVector3(block.location), 1);
     let blocks = 1;
     for (let { distance, pos: blockPos } of cordinates) {
         if (!noLimit && blocks >= maxBlocks) break;
         if (breakBlockFromLocIf(blockType, dimension, blockPos)) {
             if (!noLimit && distance >= maxDistance) break;
             cordinates.push(
-                ...getValidNeighbors(Vector.fromVector3(blockPos), distance + 1)
+                ...getValidNeighbors(Vec3.fromVector3(blockPos), distance + 1)
             );
             blocks++;
         }
@@ -106,7 +82,7 @@ export function damageItem(
 
 export function breakBlockFromLoc(
     dimension: Dimension,
-    location: Vector | Vector3
+    location: Vec3 | Vector3
 ): boolean {
     const targetBlock = dimension.getBlock(location);
     if (!targetBlock) return false;
@@ -118,7 +94,7 @@ export function breakBlockFromLoc(
 export function breakBlockFromLocIf(
     blockType: BlockType,
     dimension: Dimension,
-    location: Vector | Vector3
+    location: Vec3 | Vector3
 ): boolean {
     const targetBlock = dimension.getBlock(location);
     if (!targetBlock) return false;
@@ -144,8 +120,8 @@ export function breakBlockIf(
     return false;
 }
 
-export default function (world: World): Vector {
-    const defaultWorldSpawn: Vector = world.getDefaultSpawnLocation() as Vector;
+export default function (world: World): Vec3 {
+    const defaultWorldSpawn: Vec3 = world.getDefaultSpawnLocation() as Vec3;
     if (defaultWorldSpawn.y < 319) return defaultWorldSpawn;
     defaultWorldSpawn.y = 319;
     const overworld: Dimension = world.getDimension("overworld");
@@ -165,5 +141,5 @@ export default function (world: World): Vector {
         }
     }
 
-    return world.getDefaultSpawnLocation() as Vector;
+    return world.getDefaultSpawnLocation() as Vec3;
 }

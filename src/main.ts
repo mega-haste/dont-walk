@@ -1,17 +1,26 @@
-import { world, Entity, Player } from "@minecraft/server";
-import { ActionFormData } from "@minecraft/server-ui";
-import { Vector } from "./utils.js";
-import defaultSpawn from "./scrolls_method/defaultSpawn.js";
-import lastDeath from "./scrolls_method/lastDeath.js";
-import home from "./scrolls_method/home.js";
+import { world, Entity } from "@minecraft/server";
+import defaultSpawn from "./scrolls_method/defaultSpawn";
+import lastDeath from "./scrolls_method/lastDeath";
 
-import nether from "./scrolls_method/nether.js";
-import theEnd from "./scrolls_method/theEnd.js";
-import "./transfer.js";
-import "./lodestone.js";
-import "./compass/main.js";
-import "./tools/lumberjack_axe.js";
+import "./transfer";
+import "./lodestone";
+import "./tools/lumberjack_axe";
+import { PaperOfEnding } from "./scrolls/paper_of_ending";
+import { PaperOfSuffering } from "./scrolls/paper_of_suffering";
+import { RecallPaper } from "./scrolls/recall_paper";
+import { DimentionalPhone } from "./scrolls/dimensional_phone";
+import * as Compass from "./compass/index";
 
+world.beforeEvents.worldInitialize.subscribe((ev) => {
+    ev.itemComponentRegistry.registerCustomComponent("haste:paper_of_ending", new PaperOfEnding());
+    ev.itemComponentRegistry.registerCustomComponent("haste:paper_of_suffering", new PaperOfSuffering());
+    ev.itemComponentRegistry.registerCustomComponent("haste:recall_paper", new RecallPaper());
+    ev.itemComponentRegistry.registerCustomComponent("haste:dimensional_phone", new DimentionalPhone());
+
+    Compass.regesterAll(ev);
+});
+
+// Prevents Creeper from breaking blocks
 world.beforeEvents.explosion.subscribe((ev) => {
     if (ev.source?.typeId === "minecraft:creeper") {
         ev.setImpactedBlocks([]);
@@ -36,15 +45,6 @@ world.afterEvents.itemCompleteUse.subscribe((ev) => {
 
 world.afterEvents.itemUse.subscribe(({ itemStack: item, source }) => {
     switch (item.typeId) {
-        case "haste:recall_paper":
-            home(source);
-            break;
-        case "haste:paper_of_suffering":
-            nether(source);
-            break;
-        case "haste:paper_of_ending":
-            theEnd(source);
-            break;
         case "minecraft:recovery_compass":
             lastDeath(source);
             break;
@@ -52,60 +52,5 @@ world.afterEvents.itemUse.subscribe(({ itemStack: item, source }) => {
             if (!source.isSneaking) break;
             defaultSpawn(source);
             break;
-        case "haste:dimensional_phone":
-            dimensionalPhone(source);
-            break;
-        default:
-            break;
     }
 });
-
-function dimensionalPhone(source: Player) {
-    const form = new ActionFormData()
-        .title("Dimentional Phone")
-        .body("Select option")
-        .button("Home", "textures/items/recall_scroll")
-        .button("Spawn", "textures/items/bed_purple")
-        .button("World spawn", "textures/items/compass_item")
-        .button("Last death body", "textures/items/recovery_compass_item")
-        .button("Nether", "textures/items/scroll_of_pain")
-        .button("The end", "textures/items/the_end_scroll")
-        .show(source as any);
-    form.then((res) => {
-        if (res.canceled) return;
-
-        switch (res.selection) {
-            case 0:
-                home(source);
-                break;
-            case 1:
-                try {
-                    const loc = source.getSpawnPoint();
-                    if (!loc) return;
-                    source.teleport(
-                        new Vector(
-                            loc?.x as number,
-                            loc?.y as number,
-                            loc?.z as number
-                        ),
-                        { dimension: loc?.dimension }
-                    );
-                } catch (e) {
-                    console.error(e);
-                }
-                break;
-            case 2:
-                defaultSpawn(source);
-                break;
-            case 3:
-                lastDeath(source);
-                break;
-            case 4:
-                nether(source);
-                break;
-            case 5:
-                theEnd(source);
-                break;
-        }
-    }).catch((_) => console.error(_));
-}

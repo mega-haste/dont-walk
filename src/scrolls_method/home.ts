@@ -1,6 +1,6 @@
 import { Player, world } from "@minecraft/server";
-import defaultSpawn from "./defaultSpawn.js";
-import { Vector } from "../utils.js";
+import defaultSpawn from "./defaultSpawn";
+import { Vec3 as Vector } from "../mcQuery/math";
 
 export default function home(source: Player) {
     if (source.isSneaking) {
